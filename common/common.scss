@@ -66,6 +66,7 @@ $idle-now-playing-message: $Now_playing_message !default;
 
 #idle-toggle {
   transition: all ease $idle-animation-duration;
+  opacity: .7;
 
   &.idle--playing {
     color: $idle-toggle-color;
@@ -73,10 +74,6 @@ $idle-now-playing-message: $Now_playing_message !default;
 
   &:focus {
     background: initial;
-    color: dark-light-choose(
-      scale-color($header_primary, $lightness: 50%),
-      $header_primary
-    );
   }
 }
 
