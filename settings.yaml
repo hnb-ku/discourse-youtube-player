@@ -20,7 +20,7 @@ Player_side:
 Move_content:
   default: false
   description:
-    en: "If cheked, the player will push content aside when open."
+    en: "If checked, the player will push content aside when open."
 
 Toggle_icon:
   default: "music"
