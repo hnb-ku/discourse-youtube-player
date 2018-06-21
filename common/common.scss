@@ -127,7 +127,7 @@ $idle-now-playing-message: $Now_playing_message;
 	}
 	p {
 		width: 100%;
-		padding-left: calc(#{$idle-item-height} * 2);
+		padding-left: calc((#{$idle-item-height} + 5) * 2);
 		padding-right: 5%;
 		align-items: center;
 		margin: 0;
