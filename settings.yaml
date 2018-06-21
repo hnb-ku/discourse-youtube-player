@@ -1,0 +1,38 @@
+Playlist_id:
+  default: ''
+  description:
+    en: "playlist id"
+
+Youtube_API_key:
+  default: ''
+  description:
+    en: "Youtube API key"
+
+Player_side:
+  default: left
+  type: enum
+  choices:
+    - left
+    - right
+  description:
+    en: "Which side should the player appear on?"
+
+Move_content:
+  default: false
+  description:
+    en: "If cheked, the player will push content aside when open."
+
+Toggle_icon:
+  default: "music"
+  description:
+    en: "Chose the icon for the player toggle"
+
+Now_playing_message:
+  default: "Now playing"
+  description:
+    en: "The text for <b>Now Playing</b> message"
+
+Disable_on_mobile:
+  default: true
+  description:
+    en: "If checked, the player will be disabled on mobile devices"
