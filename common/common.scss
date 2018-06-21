@@ -10,7 +10,7 @@ $idle-animation-duration: 0.4s !default;
 $idle-push-min-width: 790 !default;
 $idle-transition-timing-function: cubic-bezier(1, -0.25, 0, 1.25) !default;
 $idle-item-height: 62px !default;
-$idle-now-playing-message: $Now_playing_message;
+$idle-now-playing-message: $Now_playing_message !default;
 
 .player-wrapper,
 #idle-now,
