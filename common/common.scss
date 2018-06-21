@@ -182,7 +182,7 @@ $idle-now-playing-message: $Now_playing_message !default;
   position: fixed;
   left: 0;
   bottom: 0;
-  background: lighten($idle-background-color, 2%);
+  background: $idle-background-color;
   max-width: 100%;
   display: flex;
   z-index: 2;
