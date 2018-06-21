@@ -216,7 +216,7 @@ span.idle-thumbnail.clone.idle-now {
 
 .clone.idle-now {
   display: flex;
-  background: white;
+  background: $idle-background-color;
   p {
     color: $header_primary;
   }
