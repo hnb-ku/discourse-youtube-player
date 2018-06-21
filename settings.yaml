@@ -27,6 +27,11 @@ Toggle_icon:
   description:
     en: "Chose the icon for the player toggle"
 
+Toggle_title:
+  default: "Check out my music!"
+  description:
+    en: "The text for <b>Now Playing</b> message"
+
 Now_playing_message:
   default: "Now playing"
   description:
