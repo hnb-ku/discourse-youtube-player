@@ -1,0 +1,6 @@
+@if $Disable_on_mobile == 'true' {
+  #idle-toggle,
+  #idle {
+      display: none;
+  }
+} 
