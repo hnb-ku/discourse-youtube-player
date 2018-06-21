@@ -1,0 +1,13 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.nicescroll/3.7.6/jquery.nicescroll.min.js"></script>
+
+<script type="text/discourse-plugin" version="0.8.18">
+$(document).ready(function() {
+  $("#idle-thumbs").niceScroll({
+    cursorcolor: "#424242",
+    cursorborder: "0",
+    cursorborderradius: "0",
+    bouncescroll: false,
+    enablescrollonselection: false
+  });
+});
+</script>
