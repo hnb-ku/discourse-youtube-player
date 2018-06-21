@@ -1,0 +1,395 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sidr/2.2.1/jquery.sidr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/4.0.4/lazysizes.min.js"></script>
+
+<script type='text/x-handlebars' data-template-name='/connectors/below-footer/inject-sidr'>
+	<div id="idle">
+		<div id="idle-wrapper">
+			<div class="player-wrapper">
+				<div id="player"></div>
+			</div>
+			<ul id="idle-thumbs">
+				{{loading-spinner}}
+			</ul>
+		</div>
+		<div id="idle-now" class="wrap">
+			<li id="track-name">
+				<li class="current-time">
+					<p><span id="current-time">0:00</span> / <span id="duration">0:00</span></p>
+					<li id="track-name"></li>
+				</li>
+			</li>
+			<ul id="idle-controls">
+				<li class="buttons d-header-icons">
+					<ul class="idle-buttons">
+						<li class="prev-button icon">
+							<i id="prev" class="fa fa-step-backward d-icon"></i>
+						</li>
+						<li class="play-button icon">
+							<i id="play" class="fa fa-play d-icon"></i>
+						</li>
+						<li class="pause-button icon">
+							<i id="pause" class="fa fa-pause d-icon"></i>
+						</li>
+						<li class="next-button icon">
+							<i id="next" class="fa fa-step-forward d-icon"></i>
+						</li>
+					</ul>
+				</li>
+				<li class="time-progress">
+					<ul class="track-info">
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</div>
+</script>
+
+
+<script type="text/discourse-plugin" version="0.8.18">
+$(document).ready(function() {
+  var $idlePush = settings.Move_content,
+    $idleSide = settings.Player_side,
+    $idleBody = "#main",
+    $idleClick = false;
+
+  if ($idlePush === true) {
+    $("#main").addClass("idle-push");
+    $("#idle-toggle").sidr({
+      name: "idle",
+      displace: true,
+      side: $idleSide,
+      body: $idleBody,
+      onOpen: function() {
+        $("#main-outlet").addClass("idle-content-animation");
+      },
+      onClose: function() {
+        $("#main-outlet").addClass("idle-content-animation");
+      },
+      onOpenEnd: function() {
+        $("#main-outlet").removeClass("idle-content-animation");
+      },
+      onCloseEnd: function() {
+        $("#main-outlet").removeClass("idle-content-animation");
+      }
+    });
+  } else {
+    $("#idle-toggle").sidr({
+      name: "idle",
+      displace: false,
+      side: $idleSide,
+      body: $idleBody
+    });
+  }
+
+  if ($idleClick === true) {
+    $(document).on("click", function() {
+      $.sidr("close", "idle");
+    });
+  }
+});
+
+api.decorateWidget("header-icons:before", helper => {
+  var $idleTitle = "Toggle menu";
+  $idleIcon = settings.Toggle_icon;
+  $idleClass = ".fa-" + $idleIcon;
+  $idleHelper = "i.fa" + $idleClass + ".d-icon";
+
+  return helper.h("li", [
+    helper.h(
+      "a#idle-toggle.icon",
+      {
+        href: "#idle",
+        title: $idleTitle
+      },
+      helper.h($idleHelper)
+    )
+  ]);
+});
+
+$(document).ready(function() {
+  var id = settings.Playlist_id;
+  var key = settings.Youtube_API_key;
+  var idlelistID = id;
+  var idleKey = key;
+  var idleW = 175;
+  $("#idle-now")
+    .hide()
+    .css("height", "0");
+
+  var player;
+  var idle_player = $("#idle-wrapper #player");
+  var playlistID = idlelistID;
+  var idle_thumbs = document.getElementById("idle-thumbs");
+  var nowPlaying = "idle-now-playing";
+  var nowPlayingClass = "." + nowPlaying;
+  var idle_index = 0; //Playlists begin at the first video by default
+  var playerW = idleW;
+  var playerH = playerW / 1.777;
+
+  var tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName("script")[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  function getPlaylistData(playlistID, video_list, page_token) {
+    var apiKey = idleKey;
+    var theUrl =
+      "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet" +
+      "&playlistId=" +
+      playlistID +
+      "&key=" +
+      apiKey;
+    if (page_token) {
+      theUrl += "&pageToken=" + page_token;
+    }
+    var xmlHttp = null;
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", theUrl, true);
+    xmlHttp.send(null);
+    xmlHttp.onload = function(e) {
+      buildJSON(xmlHttp.responseText, video_list, playlistID);
+    };
+  }
+
+  function buildJSON(response, list, playlistID) {
+    var results = JSON.parse(response);
+    if (!list) {
+      list = [];
+    }
+    list.push.apply(list, results.items);
+    if (results.nextPageToken) {
+      getPlaylistData(playlistID, list, results.nextPageToken);
+    } else {
+      buildHTML(list);
+    }
+  }
+
+  function buildHTML(data) {
+    var list_data = "";
+    for (i = 0; i < data.length; i++) {
+      var item = data[i].snippet;
+      if (!item.thumbnails) {
+        continue;
+      }
+      list_data +=
+        '<li data-idle-index="' +
+        i +
+        '"><p>' +
+        item.title +
+        '</p><span class="idle-thumbnail"><img alt="' +
+        item.title +
+        '" src="' +
+        item.thumbnails.medium.url +
+        '"/></span></li>';
+    }
+    idle_thumbs.innerHTML = list_data;
+  }
+  getPlaylistData(playlistID);
+
+  // player settings
+  window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player("player", {
+      height: playerH,
+      width: playerW,
+      playerVars: {
+        listType: "playlist",
+        color: "white",
+        iv_load_policy: "3",
+        modestbranding: "1",
+        rel: "0",
+        showinfo: "0",
+        controls: "1",
+        list: playlistID,
+        suggestedQuality: "tiny"
+      },
+      events: {
+        onReady: onPlayerReady,
+        onStateChange: onPlayerStateChange
+      }
+    });
+
+    // Sizing function
+    function idleHeight() {
+      var $header_h = $(".d-header").outerHeight();
+      playerW = $("#idle-wrapper #player").width();
+      $("#idle-wrapper #player").css("height", playerW / 1.777 + "px");
+      playerH = $("#idle-wrapper .player-wrapper").height();
+      $now_h = $("#idle-now").height();
+      h = document.documentElement.clientHeight;
+      $playlist_h = h - $header_h - playerH;
+      idle_thumbs.style.height = $playlist_h + "px";
+      $("#idle").css("margin-top", $header_h + "px");
+      $("#idle-thumbs").css("max-height", $playlist_h + "px");
+    }
+
+    function onPlayerReady(event) {
+      idleHeight();
+      $(window).resize(function() {
+        idleHeight();
+      });
+    }
+
+    // player state change functions
+    function onPlayerStateChange(event) {
+      var currentIndex = player.getPlaylistIndex();
+      var the_thumbs = idle_thumbs.getElementsByTagName("li");
+      var currentThumb = the_thumbs[currentIndex];
+
+      //idleProgress();
+
+      $("#idle-toggle.idle--playing").removeClass("idle--playing");
+      $("body").removeClass("idle--playing");
+      $("#idle-now:not(.idle--playing-now)").addClass("idle--playing-now");
+
+      // if paused
+      if (event.data !== YT.PlayerState.PAUSED) {
+        $(".clone").remove();
+        $("#idle-now")
+          .show()
+          .css("height", "auto");
+      }
+
+      // if playing
+      if (event.data == YT.PlayerState.PLAYING) {
+        $("body").addClass("idle--playing");
+        $("#idle_thumbs").addClass("idle--playing");
+        $("#idle-toggle").addClass("idle--playing");
+        $("#idle-now")
+          .show()
+          .css("height", "auto");
+
+        for (var i = 0; i < the_thumbs.length; i++) {
+          the_thumbs[i].className = "";
+        }
+
+        currentThumb.className = nowPlaying;
+
+        $("li.idle-now-playing>p")
+          .clone()
+          .appendTo("#track-name")
+          .addClass("clone idle-now");
+        $("li.idle-now-playing")
+          .clone()
+          .appendTo("#idle-wrapper")
+          .addClass("clone idle-now");
+
+        $currentH = $(".idle-now-playing").height();
+        $("#idle-thumbs").css("padding-bottom", $currentH);
+      }
+
+      // if ended
+      if (
+        event.data == YT.PlayerState.ENDED &&
+        currentIndex == the_thumbs.length - 1 &&
+        the_thumbs[currentIndex].className == nowPlaying
+      ) {
+        jQuery.event.trigger("playlistEnd");
+      }
+      idleHeight();
+    } // onPlayerStateChange
+
+    jQuery(document).on(
+      "click",
+      '[data-idle-index]:not(".idle-now-playing")',
+      function(e) {
+        idle_index = Number(jQuery(this).attr("data-idle-index"));
+        //if IOS
+        if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+          player.cuePlaylist({
+            listType: "playlist",
+            list: playlistID,
+            index: idle_index,
+            suggestedQuality: "tiny"
+          });
+        } else {
+          player.playVideoAt(idle_index);
+        }
+        jQuery(nowPlayingClass).removeClass(nowPlaying);
+      }
+    );
+
+    // buttons
+    $("#play").on("click", function() {
+      player.playVideo();
+    });
+
+    $("#pause").on("click", function() {
+      player.pauseVideo();
+    });
+
+    $("#next").on("click", function() {
+      player.nextVideo();
+    });
+
+    $("#prev").on("click", function() {
+      player.previousVideo();
+    });
+
+    /* future features
+		$("#mute-toggle").on("click", function() {
+			var mute_toggle = $(this);
+
+			if (player.isMuted()) {
+				player.unMute();
+				mute_toggle.text("volume_up");
+			} else {
+				player.mute();
+				mute_toggle.text("volume_off");
+			}
+		});
+
+		$("#volume-input").on("change", function() {
+			player.setVolume($(this).val());
+		});
+
+		var time_update_interval = 0;
+
+		function idleProgress() {
+			// Update the controls on load
+			updateTimerDisplay();
+			updateProgressBar();
+
+			// Clear any old interval.
+			clearInterval(time_update_interval);
+
+			// Start interval to update elapsed time display and
+			// the elapsed part of the progress bar every second.
+			time_update_interval = setInterval(function idleTimer() {
+				updateTimerDisplay();
+				updateProgressBar();
+			}, 500);
+		}
+
+		// This function is called by initialize()
+		function updateTimerDisplay() {
+			// Update current time text display.
+			$("#current-time").text(formatTime(player.getCurrentTime()));
+			$("#duration").text(formatTime(player.getDuration()));
+		}
+
+		function formatTime(time) {
+			time = Math.round(time);
+			var minutes = Math.floor(time / 60),
+				seconds = time - minutes * 60;
+			seconds = seconds < 10 ? "0" + seconds : seconds;
+			return minutes + ":" + seconds;
+		}
+
+		//$("#progress-bar").on("mouseup touchend", function(e) {
+		// Calculate the new time for the video.
+		// new time in seconds = total duration in seconds * ( value of range input / 100 )
+		//	var newTime = player.getDuration() * (e.target.value / 100);
+
+		// Skip video to new time.
+		//	player.seekTo(newTime);
+		//});
+
+		// This function is called by initialize()
+		function updateProgressBar() {
+			// Update the value of our progress bar accordingly.
+			$("#progress-bar").val(player.getCurrentTime() / player.getDuration() * 100);
+		}
+		*/
+  }; // onYouTubeIframeAPIReady
+}); // $(document).ready(function()
+</script>
