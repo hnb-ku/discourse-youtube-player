@@ -1,5 +1,6 @@
 {
   "name": "Youtube Player",
   "about_url": "https://github.com/hnb-ku/discourse-youtube-player",
-  "license_url": "https://github.com/hnb-ku/discourse-youtube-player/blob/master/LICENSE"
+  "license_url": "https://github.com/hnb-ku/discourse-youtube-player/blob/master/LICENSE",
+  "component": true
 }
