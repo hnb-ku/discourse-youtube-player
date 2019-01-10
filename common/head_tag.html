@@ -46,6 +46,8 @@
 
 
 <script type="text/discourse-plugin" version="0.8.18">
+const { iconNode } = require("discourse-common/lib/icon-library");
+
 $(document).ready(function() {
   var $idlePush = settings.Move_content,
     $idleSide = settings.Player_side,
@@ -90,9 +92,6 @@ $(document).ready(function() {
 
 api.decorateWidget("header-icons:before", helper => {
   var $idleTitle = settings.Toggle_title;
-  $idleIcon = settings.Toggle_icon;
-  $idleClass = ".fa-" + $idleIcon;
-  $idleHelper = "i.fa" + $idleClass + ".d-icon";
 
   return helper.h("li", [
     helper.h(
@@ -101,7 +100,7 @@ api.decorateWidget("header-icons:before", helper => {
         href: "#idle",
         title: $idleTitle
       },
-      helper.h($idleHelper)
+      iconNode(settings.Toggle_icon)
     )
   ]);
 });
