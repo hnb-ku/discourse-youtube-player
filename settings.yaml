@@ -41,3 +41,7 @@ Disable_on_mobile:
   default: true
   description:
     en: "If checked, the player will be disabled on mobile devices"
+
+extend_content_security_policy:
+  type: list
+  default: "script_src: https://cdnjs.cloudflare.com|https://www.youtube.com|https://s.ytimg.com|https://www.googleapis.com/youtube"
