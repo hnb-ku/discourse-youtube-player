@@ -44,4 +44,4 @@ Disable_on_mobile:
 
 extend_content_security_policy:
   type: list
-  default: "script_src: https://cdnjs.cloudflare.com|https://www.youtube.com|https://s.ytimg.com|https://www.googleapis.com/youtube"
+  default: "script_src: https://cdnjs.cloudflare.com|script_src: https://www.youtube.com|script_src: https://s.ytimg.com|script_src: https://www.googleapis.com/youtube"
